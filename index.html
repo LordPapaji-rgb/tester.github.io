@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubah Warna dengan Tap atau Spasi</title>
+    <style>
+        body {
+            transition: background-color 0.5s;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            user-select: none; /* Mencegah pemilihan teks secara default */
+        }
+        #targetColorDisplay {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        #counter {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="targetColorDisplay">Tap layar menemukan warna: <span id="targetColor"></span></div>
+<div id="counter">Jumlah tap: 0</div>
+
+<script>
+    let notificationShown = false;
+    let tapCount = 0;
+
+    // Membuat warna target acak saat halaman dimuat
+    let targetColor = generateRandomColor();
+    document.getElementById('targetColor').innerText = targetColor;
+    document.getElementById('targetColor').style.color = targetColor;
+
+    // Mencegah tindakan klik kanan (contextmenu)
+    document.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+        alert("Mau curang?");
+    });
+
+    // Mencegah penggunaan F12 untuk membuka dev tools
+    document.addEventListener('keydown', function(event) {
+        // Deteksi F12 (F12 memiliki event.code 'F12')
+        if (event.code === 'F12') {
+            event.preventDefault();
+            alert("Lu mau ngapain? Mau curang?");
+            // Reset jumlah tap
+            tapCount = 0;
+            document.getElementById('counter').innerText = `Jumlah tap: ${tapCount}`;
+            alert("mampus"); // Notifikasi muncul setelah reset
+        }
+
+        // Cegah pemilihan teks saat Tab ditekan
+        if (event.code === 'Tab') {
+            event.preventDefault();
+        }
+
+        // Deteksi tombol spasi
+        if (event.code === 'Space') {
+            event.preventDefault();
+            handleTapOrSpace(); // Memanggil fungsi saat spasi ditekan
+        }
+    });
+
+    // Deteksi tap atau klik (pointerdown menangkap sentuhan dan klik)
+    document.addEventListener('pointerdown', function() {
+        handleTapOrSpace(); // Memanggil fungsi saat tap/klik terjadi
+    });
+
+    // Fungsi untuk menangani tap atau spasi
+    function handleTapOrSpace() {
+        // Menambah jumlah tap/spasi
+        tapCount++;
+
+        // Memperbarui tampilan jumlah tap/spasi
+        document.getElementById('counter').innerText = `Jumlah tap: ${tapCount}`;
+
+        let randomColor = generateRandomColor();
+
+        // Tap/Spasi ke-3000 akan langsung menghasilkan warna target
+        if (tapCount === 10000) {
+            randomColor = targetColor;
+            alert(`Selamat! Kamu mendapatkan warna target pada tap ke-10000! Warna: ${targetColor}`);
+        } 
+        // Setelah tap/spasi ke-2000, meningkatkan kemungkinan munculnya warna target dengan probabilitas 0.001%
+        else if (tapCount >= 5000) {
+            const isTargetColor = Math.random() < 0.001; // 0.001% kemungkinan untuk warna target
+            randomColor = isTargetColor ? targetColor : generateRandomColor();
+        }
+
+        // Mengubah warna latar belakang
+        document.body.style.backgroundColor = randomColor;
+
+        // Memeriksa apakah warna yang dihasilkan adalah warna target (untuk kasus non-3000)
+        if (randomColor === targetColor && !notificationShown && tapCount !== 3000) {
+            notificationShown = true; // Mengatur status notifikasi
+            alert(`Congratulations! You've got the target color: ${targetColor}!`);
+        }
+
+        // Menampilkan notifikasi setelah 1000 kali tap/spasi
+        if (tapCount === 2000) {
+            alert("change meningkat");
+        }
+
+        // Mengatur ulang status notifikasi agar bisa muncul lagi setelah beberapa waktu
+        setTimeout(() => {
+            notificationShown = false;
+        }, 5000); // Mengatur ulang setelah 5 detik
+    }
+
+    // Fungsi untuk menghasilkan warna acak
+    function generateRandomColor() {
+        return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+    }
+</script>
+
+</body>
+</html>
